@@ -387,8 +387,8 @@ func fill_gaps() -> void:
 func protect_cells() -> void:
 	for c in required:
 		var p: Vector2i = c
-		for dx in range(-keep_clear, keep_clear + 1):
-			for dz in range(-keep_clear, keep_clear + 1):
+		for dx in range(0, keep_clear+1):
+			for dz in range(0, keep_clear+1):
 				var q: Vector2i = p + Vector2i(dx, dz)
 				if not in_map(q):
 					continue
