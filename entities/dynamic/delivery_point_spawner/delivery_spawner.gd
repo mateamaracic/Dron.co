@@ -16,7 +16,6 @@ func spawn_delivery_point():
 	add_child(delivery_point_instance)
 
 	delivery_point_instance.global_position = spawn_marker.global_position
-	#delivery_point_instance.on_delivery.connect(self.package_delivered())
 	delivery_point_instance.connect("on_delivery", Callable(self, "package_delivered"))
 	
 func package_delivered():

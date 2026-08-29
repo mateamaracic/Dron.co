@@ -19,8 +19,12 @@ var packages_delivered := 0:
 @export var WIND_AREA: PlayerArea3D
 @export var HEADQUARTERS: Headquarters
 @export var POINT_SPAWNER: DeliveryPointSpawner
-		
+@export var POINTS_OF_INTEREST: Node3D  # roditelj Headquartersa i svih Chargera
+@export var CITY_GENERATOR: Node3D      # $Town/CityGenerator
+
 func _ready() -> void:
+	_generate_city()
+
 	# game_master_time -> interface
 	self.connect("time_changed", Callable(INTERFACE, "set_countdown"))
 	# game_master_delivered -> interface
@@ -75,3 +79,15 @@ func _input(_event):
 func deliver():
 	packages_delivered += 1
 	GAME_TIMER.start(GAME_TIMER.time_left + TIME_ADD_ON_DELIVERY)
+
+func _generate_city() -> void:
+	if not CITY_GENERATOR:
+		return
+	var reserved: Array = []
+	if POINTS_OF_INTEREST:
+		for child in POINTS_OF_INTEREST.get_children():
+			reserved.append(child.global_position)
+	if POINT_SPAWNER:
+		for marker in POINT_SPAWNER.get_children():
+			reserved.append(marker.global_position)
+	CITY_GENERATOR.generate_city(randi(), reserved)

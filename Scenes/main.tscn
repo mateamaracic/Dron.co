@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3 uid="uid://rmbm2tujnepm"]
+[gd_scene load_steps=18 format=3 uid="uid://rmbm2tujnepm"]
 
 [ext_resource type="PackedScene" uid="uid://c8518p5fip7jw" path="res://entities/dynamic/drone/drone_body_3d.tscn" id="1_jjgbg"]
 [ext_resource type="PackedScene" uid="uid://2qydddknolyo" path="res://Scenes/town.tscn" id="2_0wfyh"]
@@ -9,6 +9,7 @@
 [ext_resource type="PackedScene" uid="uid://dskhfpxgdfoav" path="res://entities/dynamic/headquarters/headquarters.tscn" id="7_6bp64"]
 [ext_resource type="PackedScene" uid="uid://daxervjj2enkh" path="res://entities/dynamic/player_area/player_area_3d.tscn" id="7_o6xl0"]
 [ext_resource type="Script" uid="uid://b0fpvqns8ypbj" path="res://entities/dynamic/delivery_point_spawner/delivery_spawner.gd" id="9_ynf5e"]
+[ext_resource type="Script" uid="uid://oc8lmsd3lehf" path="res://Scenes/control.gd" id="11_d1ilt"]
 [ext_resource type="Script" uid="uid://b5e3dto2xmbmw" path="res://entities/dynamic/wind/wind_follow.gd" id="11_ya4ey"]
 
 [sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_hptm8"]
@@ -42,7 +43,7 @@ size = Vector3(400, 40, 440)
 [sub_resource type="BoxShape3D" id="BoxShape3D_tipki"]
 size = Vector3(360, 53, 400)
 
-[node name="GameMaster" type="Node3D" node_paths=PackedStringArray("GAME_TIMER", "DRONE", "INTERFACE", "ENVIRONMENT", "GAME_AREA", "SIGNAL_AREA", "WIND_AREA", "HEADQUARTERS", "POINT_SPAWNER")]
+[node name="GameMaster" type="Node3D" node_paths=PackedStringArray("GAME_TIMER", "DRONE", "INTERFACE", "ENVIRONMENT", "GAME_AREA", "SIGNAL_AREA", "WIND_AREA", "HEADQUARTERS", "POINT_SPAWNER", "POINTS_OF_INTEREST", "CITY_GENERATOR")]
 script = ExtResource("4_85g3d")
 GAME_TIMER = NodePath("GameDurationTimer")
 DRONE = NodePath("DroneBody3D")
@@ -53,6 +54,8 @@ SIGNAL_AREA = NodePath("Areas/SignalArea")
 WIND_AREA = NodePath("Areas/WindArea")
 HEADQUARTERS = NodePath("PointsOfIntrest/Headquarters")
 POINT_SPAWNER = NodePath("DeliveryPointSpawner")
+POINTS_OF_INTEREST = NodePath("PointsOfIntrest")
+CITY_GENERATOR = NodePath("Town/CityGenerator")
 
 [node name="GameDurationTimer" type="Timer" parent="."]
 wait_time = 121.0
@@ -191,4 +194,16 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -95.05144, 0.099998474, -19.9
 [node name="Point 20" type="Marker3D" parent="DeliveryPointSpawner"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -75.21979, 0.36694908, -94.94168)
 
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="Generator_menu" type="Control" parent="CanvasLayer" node_paths=PackedStringArray("generator")]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("11_d1ilt")
+generator = NodePath("../../Town/CityGenerator")
+
 [connection signal="on_delivery" from="DeliveryPointSpawner" to="DroneBody3D" method="_on_delivery_point_spawner_on_delivery"]
+
+[editable path="Town"]
