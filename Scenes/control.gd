@@ -104,7 +104,3 @@ func generate() -> void:
 	generator.random_seed = random_box.button_pressed
 	generator.build()
 	seed_box.set_value_no_signal(generator.seed_value)
-
-func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
-		visible = not visible

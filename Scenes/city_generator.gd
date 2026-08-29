@@ -19,7 +19,7 @@ enum Cell { VOID, EMPTY, ROAD, SIDEWALK, GRASS, BUILDING }
 @export_range(0, 4) var keep_clear := 1
 
 var max_run := 8
-var bend_chance := 0.45
+var bend_chance := 0.4
 var building_facing := "0"
 
 const MARGIN := 2
@@ -34,7 +34,7 @@ const CORNER := {3: 270.0, 6: 0.0, 12: 90.0, 9: 180.0}
 
 const SIDEWALK_TILE := "14_concrete"
 const GRASS_TILE := "12_grass"
-const LAMP_CHANCE := 0.08
+const LAMP_CHANCE := 0.1
 
 const TREE_TILES := ["01_green_large", "02_green_medium", "03_green_small", "04_green_tiny",
 	"05_orange_large", "06_orange_medium", "07_orange_small", "08_orange_tiny",
@@ -110,6 +110,7 @@ func protected_points() -> Array:
 			points.append(item)
 	return points
 
+#main function for generation process
 func generate_city(use_seed: int, keep_out: Array = []) -> void:
 	rng.seed = use_seed
 	extra_points = keep_out
@@ -228,6 +229,7 @@ func can_branch(p: Vector2i) -> bool:
 func road_is_near(p: Vector2i) -> bool:
 	return in_map(p) and covered[p.x][p.y]
 
+#which cells are covered by road
 func mark_covered(p: Vector2i) -> void:
 	for dx in range(-road_branching, road_branching + 1):
 		for dz in range(-road_branching, road_branching + 1):
@@ -275,6 +277,7 @@ func undo_road(cells: Array) -> bool:
 		grid[p.x][p.y] = Cell.VOID
 	return false
 
+#find best cell to grow a road
 func best_start(target: Vector2i) -> Vector2i:
 	var best := Vector2i(-1, -1)
 	var best_distance := 1 << 30
@@ -291,6 +294,7 @@ func best_start(target: Vector2i) -> Vector2i:
 			best = p
 	return best
 
+#calculate road directions
 func road_towards(target: Vector2i) -> bool:
 	var start := best_start(target)
 	if start.x < 0:
@@ -351,6 +355,7 @@ func grow_roads() -> void:
 		if not progress:
 			return
 
+#cells next to road belong to the city
 func spread_city() -> void:
 	for c in roads:
 		var p: Vector2i = c
@@ -378,6 +383,7 @@ func fill_gaps() -> void:
 		if filled == 0:
 			return
 
+#protect hq, chargers, delivery points
 func protect_cells() -> void:
 	for c in required:
 		var p: Vector2i = c
@@ -390,6 +396,7 @@ func protect_cells() -> void:
 					grid[q.x][q.y] = Cell.EMPTY
 				protected[q] = true
 
+#park logic
 func park_fits(shape: Array, corner_cell: Vector2i) -> bool:
 	var rows := shape.size()
 	var cols: int = shape[0].size()
@@ -448,16 +455,18 @@ func plan_lots() -> void:
 	for x in size:
 		for z in size:
 			var p := Vector2i(x, z)
+			#try out rules
 			if grid[x][z] != Cell.EMPTY or protected.has(p):
 				continue
 			if rng.randf() > building_density:
 				continue
 
+			#choose the building
 			var tile_name: String = BUILDING_TILES[rng.randi() % BUILDING_TILES.size()]
 			var id := tile_id(library, tile_name)
 			if id == -1:
 				continue
-
+		
 			var sides := road_sides(p)
 			var degrees := facing(sides) if sides != 0 else rng.randi_range(0, 3) * 90.0
 			building_grid_map.set_cell_item(to_gridmap(p), id,
@@ -467,18 +476,18 @@ func plan_lots() -> void:
 	for x in size:
 		for z in size:
 			if grid[x][z] == Cell.EMPTY:
-				grid[x][z] = Cell.SIDEWALK
+				grid[x][z] = Cell.SIDEWALK	#everything else in the city is sidewalk
 
 func road_sides(p: Vector2i) -> int:
 	var sides := 0
 	if is_road(p + Vector2i(0, -1)):
-		sides |= N
+		sides |= N	#north
 	if is_road(p + Vector2i(1, 0)):
-		sides |= E
+		sides |= E	#east
 	if is_road(p + Vector2i(0, 1)):
-		sides |= S
+		sides |= S	#south
 	if is_road(p + Vector2i(-1, 0)):
-		sides |= W
+		sides |= W 	#west
 	return sides
 
 func road_tile(sides: int) -> Dictionary:
@@ -501,12 +510,7 @@ func road_tile(sides: int) -> Dictionary:
 	return {"n": "", "r": 0}
 
 func tile_id(library: MeshLibrary, tile_name: String) -> int:
-	if library == null or tile_name == "":
-		return -1
-	var id := library.find_item_by_name(tile_name)
-	if id == -1:
-		push_error("No tile named: " + tile_name)
-	return id
+	return library.find_item_by_name(tile_name)
 
 func rotation_index(map: GridMap, degrees: float) -> int:
 	return map.get_orthogonal_index_from_basis(Basis(Vector3.UP, deg_to_rad(degrees)))
@@ -519,6 +523,7 @@ func put_floor(p: Vector2i, tile_name: String, degrees: float) -> void:
 	if id != -1:
 		floor_grid_map.set_cell_item(to_gridmap(p), id, rotation_index(floor_grid_map, degrees))
 
+#draw out the tiles and props
 func draw_floor() -> void:
 	for x in size:
 		for z in size:
