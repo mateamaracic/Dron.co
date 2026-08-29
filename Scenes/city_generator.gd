@@ -383,16 +383,15 @@ func fill_gaps() -> void:
 
 #protect hq, chargers, delivery points
 func protect_cells() -> void:
-	for c in required:
-		var p: Vector2i = c
+	for p in required:
 		for dx in range(-1, keep_clear+1):
 			for dz in range(-1, keep_clear+1):
-				var q: Vector2i = p + Vector2i(dx, dz)
-				if not in_map(q):
+				p = p + Vector2i(dx, dz)
+				if not in_map(p):
 					continue
-				if grid[q.x][q.y] == Cell.VOID:
-					grid[q.x][q.y] = Cell.EMPTY
-				protected[q] = true
+				if grid[p.x][p.y] == Cell.VOID:
+					grid[p.x][p.y] = Cell.EMPTY
+				protected[p] = true
 
 #park logic
 func park_fits(shape: Array, corner_cell: Vector2i) -> bool:
