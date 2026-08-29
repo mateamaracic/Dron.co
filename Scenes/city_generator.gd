@@ -249,26 +249,24 @@ func find_gaps() -> Array:
 	return gaps
 
 func keep_road(cells: Array) -> bool:
-	for c in cells:
-		var p: Vector2i = c
+	for p in cells:
 		grid[p.x][p.y] = Cell.ROAD
 
-	for c in cells:
-		var p: Vector2i = c
+	for p in cells:
 		for dx in range(-1, 2):
 			for dz in range(-1, 2):
-				var q: Vector2i = p + Vector2i(dx, dz)
-				if not is_road(q):
+				p = p + Vector2i(dx, dz)
+				if not is_road(p):
 					continue
-				if is_junction(q) and next_to_junction(q):
+				if is_junction(p) and next_to_junction(p):
 					return undo_road(cells)
-				if (is_road(q + Vector2i(1, 0)) and is_road(q + Vector2i(0, 1))
-						and is_road(q + Vector2i(1, 1))):
+				if (is_road(p + Vector2i(1, 0)) and is_road(p + Vector2i(0, 1))
+						and is_road(p + Vector2i(1, 1))):
 					return undo_road(cells)
 
-	for c in cells:
-		roads.append(c)
-		mark_covered(c)
+	for p in cells:
+		roads.append(p)
+		mark_covered(p)
 	return true
 
 func undo_road(cells: Array) -> bool:
@@ -387,8 +385,8 @@ func fill_gaps() -> void:
 func protect_cells() -> void:
 	for c in required:
 		var p: Vector2i = c
-		for dx in range(0, keep_clear+1):
-			for dz in range(0, keep_clear+1):
+		for dx in range(-1, keep_clear+1):
+			for dz in range(-1, keep_clear+1):
 				var q: Vector2i = p + Vector2i(dx, dz)
 				if not in_map(q):
 					continue
