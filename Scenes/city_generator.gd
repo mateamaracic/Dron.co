@@ -249,22 +249,25 @@ func find_gaps() -> Array:
 	return gaps
 
 func keep_road(cells: Array) -> bool:
-	for p in cells:
+	for c in cells:
+		var p: Vector2i = c
 		grid[p.x][p.y] = Cell.ROAD
 
-	for p in cells:
+	for c in cells:
+		var p: Vector2i = c
 		for dx in range(-1, 2):
 			for dz in range(-1, 2):
-				p = p + Vector2i(dx, dz)
-				if not is_road(p):
+				var q: Vector2i = p + Vector2i(dx, dz)
+				if not is_road(q):
 					continue
-				if is_junction(p) and next_to_junction(p):
+				if is_junction(q) and next_to_junction(q):
 					return undo_road(cells)
-				if (is_road(p + Vector2i(1, 0)) and is_road(p + Vector2i(0, 1))
-						and is_road(p + Vector2i(1, 1))):
+				if (is_road(q + Vector2i(1, 0)) and is_road(q + Vector2i(0, 1))
+						and is_road(q + Vector2i(1, 1))):
 					return undo_road(cells)
 
-	for p in cells:
+	for c in cells:
+		var p: Vector2i = c
 		roads.append(p)
 		mark_covered(p)
 	return true
@@ -381,17 +384,18 @@ func fill_gaps() -> void:
 		if filled == 0:
 			return
 
-#protect hq, chargers, delivery points
+#protect hq, chargers, delivery points and one ring of cells around them
 func protect_cells() -> void:
-	for p in required:
-		for dx in range(-1, keep_clear+1):
-			for dz in range(-1, keep_clear+1):
-				p = p + Vector2i(dx, dz)
-				if not in_map(p):
+	for c in required:
+		var p: Vector2i = c
+		for dx in range(-keep_clear, keep_clear + 1):
+			for dz in range(-keep_clear, keep_clear + 1):
+				var q: Vector2i = p + Vector2i(dx, dz)
+				if not in_map(q):
 					continue
-				if grid[p.x][p.y] == Cell.VOID:
-					grid[p.x][p.y] = Cell.EMPTY
-				protected[p] = true
+				if grid[q.x][q.y] == Cell.VOID:
+					grid[q.x][q.y] = Cell.EMPTY
+				protected[q] = true
 
 #park logic
 func park_fits(shape: Array, corner_cell: Vector2i) -> bool:
@@ -463,7 +467,7 @@ func plan_lots() -> void:
 			var id := tile_id(library, tile_name)
 			if id == -1:
 				continue
-		
+
 			var sides := road_sides(p)
 			var degrees := facing(sides) if sides != 0 else rng.randi_range(0, 3) * 90.0
 			building_grid_map.set_cell_item(to_gridmap(p), id,
@@ -507,6 +511,8 @@ func road_tile(sides: int) -> Dictionary:
 	return {"n": "", "r": 0}
 
 func tile_id(library: MeshLibrary, tile_name: String) -> int:
+	if library == null or tile_name == "":
+		return -1
 	return library.find_item_by_name(tile_name)
 
 func rotation_index(map: GridMap, degrees: float) -> int:
