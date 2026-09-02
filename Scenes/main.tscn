@@ -84,12 +84,6 @@ draw_pass_1 = SubResource("RibbonTrailMesh_d1ilt")
 
 [node name="Town" parent="." instance=ExtResource("2_0wfyh")]
 
-[node name="BuildingGridMap" parent="Town" index="0"]
-visible = false
-
-[node name="PropGridMap" parent="Town" index="2"]
-visible = false
-
 [node name="Areas" type="Node3D" parent="."]
 
 [node name="GameArea" parent="Areas" instance=ExtResource("7_o6xl0")]

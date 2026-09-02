@@ -19,8 +19,8 @@ var packages_delivered := 0:
 @export var WIND_AREA: PlayerArea3D
 @export var HEADQUARTERS: Headquarters
 @export var POINT_SPAWNER: DeliveryPointSpawner
-@export var POINTS_OF_INTEREST: Node3D  # roditelj Headquartersa i svih Chargera
-@export var CITY_GENERATOR: Node3D      # $Town/CityGenerator
+@export var POINTS_OF_INTEREST: Node3D 
+@export var CITY_GENERATOR: Node3D
 
 func _ready() -> void:
 	_generate_city()
