@@ -8,6 +8,7 @@ enum Cell { VOID, EMPTY, ROAD, SIDEWALK, GRASS, BUILDING }
 
 @export var seed_value := 0
 @export var random_seed := true
+@export_enum("1 ceste", "2 plocnik", "3 parkovi", "4 zgrade", "5 detalji") var phase := 4
 @export_range(4, 40) var city_size := 15
 @export_range(1, 4) var road_branching := 2
 @export_range(0.0, 1.0, 0.05) var building_density := 0.80
@@ -89,6 +90,13 @@ func _ready() -> void:
 	await get_tree().process_frame
 	build()
 
+#tipke 1-5 mijenjaju fazu i ponovno generiraju isti grad
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed:
+		if event.keycode >= KEY_1 and event.keycode <= KEY_5:
+			phase = event.keycode - KEY_1
+			generate_city(seed_value, extra_points)
+
 func build() -> void:
 	if random_seed:
 		seed_value = randi() % 1000000
@@ -124,10 +132,13 @@ func generate_city(use_seed: int, keep_out: Array = []) -> void:
 	spread_city()
 	fill_gaps()
 	protect_cells()
-	make_parks()
-	plan_lots()
+	if phase >= 2:
+		make_parks()
+	if phase >= 3:
+		plan_lots()
 	draw_floor()
-	draw_props()
+	if phase >= 4:
+		draw_props()
 
 func setup_grid() -> void:
 	var points := protected_points()
@@ -541,7 +552,8 @@ func draw_floor() -> void:
 					var g: Dictionary = park_tiles.get(p, {"n": GRASS_TILE, "r": 0})
 					put_floor(p, g["n"], float(g["r"]))
 				_:
-					put_floor(p, SIDEWALK_TILE, 0.0)
+					if phase >= 1:
+						put_floor(p, SIDEWALK_TILE, 0.0)
 
 func draw_props() -> void:
 	var library := prop_grid_map.mesh_library
